@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission & Values Landscape — Library & IT Member Organizations</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg-secondary: #f5f4f0;
+    --bg-tertiary: #eeece7;
+    --text: #1a1a18;
+    --text-secondary: #5f5e5a;
+    --border: rgba(0,0,0,0.10);
+    --border-med: rgba(0,0,0,0.18);
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --bg-secondary: #252523;
+      --bg-tertiary: #2e2e2b;
+      --text: #f0efe9;
+      --text-secondary: #9e9d97;
+      --border: rgba(255,255,255,0.09);
+      --border-med: rgba(255,255,255,0.16);
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg-tertiary);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem 3rem;
+  }
+
+  .page { max-width: 960px; margin: 0 auto; }
+
+  /* ── Header ── */
+  .page-title {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .page-sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 1.75rem;
+    line-height: 1.5;
+  }
+
+  /* ── Tabs ── */
+  .tabs { display: flex; gap: 4px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .tab {
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 0.5px solid var(--border-med);
+    background: transparent;
+    color: var(--text-secondary);
+    transition: all .15s;
+    font-family: inherit;
+  }
+  .tab:hover { border-color: var(--text); color: var(--text); }
+  .tab.active { background: var(--text); color: var(--bg); border-color: transparent; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .note { font-size: 12px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.25rem; }
+
+  /* ── Matrix ── */
+  .matrix-scroll { overflow-x: auto; }
+  table.matrix {
+    border-collapse: collapse;
+    font-size: 11px;
+    min-width: 100%;
+  }
+  table.matrix th {
+    font-weight: 400;
+    color: var(--text-secondary);
+    padding: 4px 6px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  table.matrix th.org-col {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    height: 88px;
+    vertical-align: bottom;
+    padding-bottom: 6px;
+    font-size: 10px;
+    max-width: 26px;
+  }
+  table.matrix td {
+    padding: 5px 6px;
+    border-top: 0.5px solid var(--border);
+    vertical-align: middle;
+  }
+  table.matrix td.theme-cell {
+    font-size: 11px;
+    color: var(--text);
+    white-space: nowrap;
+    padding-right: 14px;
+    min-width: 200px;
+  }
+  table.matrix td.dot-cell { text-align: center; }
+  .dot-on  { width: 13px; height: 13px; border-radius: 50%; margin: 0 auto; }
+  .dot-off { width: 13px; height: 13px; border-radius: 50%; margin: 0 auto; background: var(--bg-secondary); }
+
+  .matrix-legend {
+    display: flex;
+    gap: 18px;
+    margin-top: 12px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    flex-wrap: wrap;
+  }
+  .matrix-legend-item { display: flex; align-items: center; gap: 6px; }
+
+  /* ── Themes grid ── */
+  .theme-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+  .theme-card {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .theme-card:hover { border-color: var(--border-med); }
+  .theme-card.selected { border-width: 1.5px; border-color: var(--text); }
+  .theme-label { font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+  .theme-count { font-size: 24px; font-weight: 500; margin-bottom: 4px; }
+  .theme-bar { height: 4px; border-radius: 2px; margin-bottom: 8px; }
+  .theme-orgs { font-size: 10px; color: var(--text-secondary); line-height: 1.5; }
+
+  .theme-detail {
+    display: none;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.65;
+    margin-top: 4px;
+  }
+
+  /* ── Differentiators ── */
+  .diff-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+  }
+  .diff-card {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+  }
+  .diff-tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    letter-spacing: .02em;
+  }
+  .diff-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 5px; }
+  .diff-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.55; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1 class="page-title">Mission &amp; values landscape</h1>
+  <p class="page-sub">Dominant themes and commitments across 19 library and IT member organizations — overlaps and differentiators</p>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('matrix')">Organization × theme matrix</button>
+    <button class="tab" onclick="showTab('themes')">Themes overview</button>
+    <button class="tab" onclick="showTab('diff')">Differentiators</button>
+  </div>
+
+  <!-- ══ TAB 1: MATRIX ══ -->
+  <div class="section active" id="tab-matrix">
+    <p class="note">Filled dot = theme present in an organization's mission, vision, or values. Scroll horizontally to see all organizations.</p>
+    <div class="matrix-scroll">
+      <table class="matrix" id="matrixTable"></table>
+    </div>
+    <div class="matrix-legend">
+      <div class="matrix-legend-item">
+        <div style="width:13px;height:13px;border-radius:50%;background:#185FA5;opacity:0.85;"></div>
+        Theme expressed
+      </div>
+      <div class="matrix-legend-item">
+        <div class="dot-off"></div>
+        Not expressed
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 2: THEMES ══ -->
+  <div class="section" id="tab-themes">
+    <p class="note">How many of the 19 organizations explicitly express each theme in their mission, vision, or values statements. Click a card to see which organizations share that theme.</p>
+    <div class="theme-grid" id="themeGrid"></div>
+    <div class="theme-detail" id="themeDetail"></div>
+  </div>
+
+  <!-- ══ TAB 3: DIFFERENTIATORS ══ -->
+  <div class="section" id="tab-diff">
+    <p class="note">Commitments that distinguish individual organizations from the pack — themes or stances claimed by three or fewer organizations, or framed in a uniquely distinctive way.</p>
+    <div class="diff-grid" id="diffGrid"></div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+/* ── DATA ── */
+const ORGS = [
+  'ARL','EDUCAUSE','ASIS&T','BTAA','CASC','Code4Lib','CSG','CLIR','DCC','DLF',
+  'ERN','LPC','NDSA','SPARC','CARL','ICOLC','iSchools','Jisc','RLUK'
+];
+
+const THEMES = [
+  {
+    id:'research', label:'Research & scholarship',
+    color:'#185FA5', bg:'#E6F1FB',
+    orgs:['ARL','BTAA','CASC','CARL','CLIR','DLF','DCC','ERN','RLUK','iSchools','NDSA','SPARC','ASIS&T','EDUCAUSE','Jisc']
+  },
+  {
+    id:'collab', label:'Collaboration & community',
+    color:'#0F6E56', bg:'#E1F5EE',
+    orgs:['ARL','BTAA','CARL','CLIR','Code4Lib','CSG','DLF','ERN','ICOLC','iSchools','LPC','NDSA','SPARC','EDUCAUSE','Jisc','RLUK']
+  },
+  {
+    id:'open', label:'Open access & open knowledge',
+    color:'#3C3489', bg:'#EEEDFE',
+    orgs:['SPARC','DLF','LPC','CARL','CLIR','NDSA','Code4Lib','iSchools']
+  },
+  {
+    id:'equity', label:'Equity, inclusion & public good',
+    color:'#993C1D', bg:'#FAECE7',
+    orgs:['ARL','DLF','SPARC','CARL','CLIR','LPC','Code4Lib']
+  },
+  {
+    id:'digital', label:'Digital transformation',
+    color:'#854F0B', bg:'#FAEEDA',
+    orgs:['DCC','DLF','NDSA','Jisc','RLUK','EDUCAUSE','Code4Lib','ERN','CASC']
+  },
+  {
+    id:'advocacy', label:'Policy advocacy',
+    color:'#A32D2D', bg:'#FCEBEB',
+    orgs:['ARL','CARL','SPARC','ICOLC','CASC','EDUCAUSE']
+  },
+  {
+    id:'preservation', label:'Digital preservation & stewardship',
+    color:'#444441', bg:'#F1EFE8',
+    orgs:['NDSA','DCC','DLF','CARL','CLIR','RLUK']
+  },
+  {
+    id:'leadership', label:'Leadership & professional development',
+    color:'#185FA5', bg:'#dceeff',
+    orgs:['ARL','CARL','CLIR','EDUCAUSE','iSchools','RLUK']
+  },
+  {
+    id:'data', label:'Data & research computing',
+    color:'#3B6D11', bg:'#EAF3DE',
+    orgs:['CASC','DCC','ERN','Jisc','EDUCAUSE']
+  },
+  {
+    id:'teaching', label:'Teaching & learning',
+    color:'#993556', bg:'#FBEAF0',
+    orgs:['EDUCAUSE','DLF','CLIR','iSchools','CARL']
+  },
+  {
+    id:'publishing', label:'Scholarly publishing',
+    color:'#0F6E56', bg:'#d4f5ea',
+    orgs:['LPC','SPARC','CARL','RLUK']
+  },
+  {
+    id:'infra', label:'Shared infrastructure & interoperability',
+    color:'#185FA5', bg:'#cce3f8',
+    orgs:['CSG','ERN','BTAA','Jisc','ICOLC','CASC']
+  },
+  {
+    id:'global', label:'Global / international reach',
+    color:'#534AB7', bg:'#EEEDFE',
+    orgs:['iSchools','ASIS&T','SPARC','ICOLC','DCC','Jisc']
+  },
+  {
+    id:'sustainability', label:'Sustainability of knowledge systems',
+    color:'#63991a', bg:'#f0f8e0',
+    orgs:['DCC','LPC','NDSA','SPARC','BTAA']
+  },
+];
+
+const DIFFERENTIATORS = [
+  {
+    org:'SPARC', tag:'Only org', tagColor:'#A32D2D', tagBg:'#FCEBEB',
+    name:'Open as explicit public good',
+    desc:'SPARC uniquely frames open access, data, and education as a public good — not just a professional or institutional benefit.'
+  },
+  {
+    org:'DCC', tag:'Only org', tagColor:'#0F6E56', tagBg:'#E1F5EE',
+    name:'Data curation as sole focus',
+    desc:'DCC is the only org whose mission centers exclusively on making best use of research data, including the curation lifecycle model and DMPonline tool.'
+  },
+  {
+    org:'CASC', tag:'Unique framing', tagColor:'#3B6D11', tagBg:'#EAF3DE',
+    name:'National competitiveness & security',
+    desc:'CASC uniquely links academic computing to national security, economic competitiveness, and 21st-century workforce — framing shared by no other org.'
+  },
+  {
+    org:'CSG', tag:'Unique stance', tagColor:'#993C1D', tagBg:'#FAECE7',
+    name:'Non-differentiation as value',
+    desc:'CSG\'s vision explicitly states IT should advance universities rather than differentiate them — a counter-competitive stance rare in mission statements.'
+  },
+  {
+    org:'NDSA', tag:'Specific mandate', tagColor:'#444441', tagBg:'#F1EFE8',
+    name:'Multi-generational preservation',
+    desc:'NDSA\'s mission explicitly names "present and future generations" as beneficiaries, grounding digital stewardship in intergenerational responsibility.'
+  },
+  {
+    org:'ERN', tag:'Unique scope', tagColor:'#3B6D11', tagBg:'#EAF3DE',
+    name:'Federated scientific instruments',
+    desc:'ERN is the only org whose mission includes shared access to physical scientific instruments, not just data or digital collections.'
+  },
+  {
+    org:'Code4Lib', tag:'Community model', tagColor:'#444441', tagBg:'#F1EFE8',
+    name:'Volunteer-only, no formal mission',
+    desc:'Code4Lib is the only entity with no formal mission statement — its identity is deliberately emergent, grassroots, and anti-institutional.'
+  },
+  {
+    org:'DLF', tag:'Social justice', tagColor:'#0F6E56', tagBg:'#E1F5EE',
+    name:'Social justice in digital libraries',
+    desc:'DLF is one of the few orgs to name social justice explicitly in its mission — framing digital library work as a justice-oriented practice.'
+  },
+  {
+    org:'RLUK', tag:'Aspiration', tagColor:'#3B6D11', tagBg:'#EAF3DE',
+    name:'\'Best in the world\' vision',
+    desc:'RLUK\'s vision ("the UK should have the best research library support in the world") is the most aspirationally competitive of any org in this set.'
+  },
+  {
+    org:'BTAA', tag:'Structural vision', tagColor:'#854F0B', tagBg:'#FAEEDA',
+    name:'Collections as single network',
+    desc:'BTAA articulates a structural transformation — fusing separate institutional collections into one fully networked shared resource — not just collaboration.'
+  },
+  {
+    org:'LPC', tag:'Landscape focus', tagColor:'#534AB7', tagBg:'#EEEDFE',
+    name:'Scholarly publishing ecosystem',
+    desc:'LPC is the only org whose mission is explicitly organized around the publishing landscape — sustainability, openness, and library-as-publisher.'
+  },
+  {
+    org:'iSchools', tag:'Academic discipline', tagColor:'#534AB7', tagBg:'#EEEDFE',
+    name:'Information as a discipline',
+    desc:'iSchools is the only org focused on the academic discipline of information science itself — shaping how information is studied, not just practiced.'
+  },
+];
+
+/* ── TABS ── */
+function showTab(id) {
+  const ids = ['matrix','themes','diff'];
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', ids[i] === id));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+/* ── BUILD MATRIX ── */
+(function () {
+  const table = document.getElementById('matrixTable');
+  let h = '<thead><tr><th style="min-width:200px;"></th>';
+  ORGS.forEach(o => { h += `<th class="org-col">${o}</th>`; });
+  h += '</tr></thead><tbody>';
+
+  THEMES.forEach(t => {
+    h += `<tr><td class="theme-cell">${t.label}</td>`;
+    ORGS.forEach(o => {
+      const has = t.orgs.includes(o);
+      h += `<td class="dot-cell">${has
+        ? `<div class="dot-on" style="background:${t.color};opacity:0.82;"></div>`
+        : `<div class="dot-off"></div>`}</td>`;
+    });
+    h += '</tr>';
+  });
+
+  h += '</tbody>';
+  table.innerHTML = h;
+})();
+
+/* ── BUILD THEMES ── */
+(function () {
+  const grid = document.getElementById('themeGrid');
+  const detail = document.getElementById('themeDetail');
+
+  THEMES.forEach(t => {
+    const pct = Math.round(t.orgs.length / 19 * 100);
+    const card = document.createElement('div');
+    card.className = 'theme-card';
+    card.innerHTML = `
+      <div class="theme-label">${t.label}</div>
+      <div class="theme-count" style="color:${t.color}">${t.orgs.length}<span style="font-size:14px;font-weight:400;color:var(--text-secondary)"> / 19</span></div>
+      <div class="theme-bar" style="width:${pct}%;background:${t.color};opacity:0.7;"></div>
+      <div class="theme-orgs">${t.orgs.join(' · ')}</div>`;
+
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      const pills = t.orgs.map(o =>
+        `<span style="display:inline-block;background:${t.bg};color:${t.color};padding:2px 9px;border-radius:10px;font-size:12px;font-weight:500;margin:2px 3px 2px 0;">${o}</span>`
+      ).join('');
+      detail.style.display = 'block';
+      detail.innerHTML = `<strong style="color:var(--text)">${t.label}</strong> — expressed by <strong>${t.orgs.length}</strong> of 19 organizations.<br><br>
+        <div style="margin-top:6px;">${pills}</div>`;
+    });
+
+    grid.appendChild(card);
+  });
+})();
+
+/* ── BUILD DIFFERENTIATORS ── */
+(function () {
+  const grid = document.getElementById('diffGrid');
+  DIFFERENTIATORS.forEach(d => {
+    const card = document.createElement('div');
+    card.className = 'diff-card';
+    card.innerHTML = `
+      <span class="diff-tag" style="background:${d.tagBg};color:${d.tagColor};">${d.tag} · ${d.org}</span>
+      <div class="diff-name">${d.name}</div>
+      <div class="diff-desc">${d.desc}</div>`;
+    grid.appendChild(card);
+  });
+})();
+</script>
+</body>
+</html>
